@@ -16,6 +16,11 @@ extractFieldsFromWSDL = (client, credentials, callback) ->
         callback null, fields
     else
         callSoapMethod client, util.getMethodName(client.describe()), credentials, {startRow: 1, endRow: 1}, (err, results) ->
+            if not results?.headers?.row?
+                errorMessage = "Could not get records from soap."
+                if results?.message?
+                    errorMessage += results.message
+                err = new Error(errorMessage)
             unless err?
                 for row in results.headers.row
                     for cell in row.cell
