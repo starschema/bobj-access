@@ -24,7 +24,6 @@ extractFieldsFromWSDL = (client, credentials, callback) ->
             unless err?
                 for row in results.headers.row
                     for cell in row.cell
-                        console.log "Pushing cell: ", cell.$value, cell.attributes
                         fields.push {name: cell.$value, type: util.getType(cell.attributes['xsi:type'])}
             callback err, fields
 
