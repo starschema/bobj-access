@@ -1,0 +1,9 @@
+# Built files
+lib/
+
+# Editor files
+*.swp
+tags
+
+# Dependencies
+node_modules/
