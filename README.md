@@ -1,2 +1,2 @@
-# sap-business-objects
-Module for retrieving tables from published SAP Business Objects reports 
+# bobj-access
+Module for retrieving tables from published Business Objects reports 
