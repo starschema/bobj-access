@@ -1,7 +1,7 @@
 util = require '../src/util'
 
 chai = require 'chai'
-chai.should()
+should = chai.should()
 
 describe 'getType', ->
     it 'should standardize different BO types', ->
@@ -25,11 +25,7 @@ describe 'getMethodName', ->
         util.getMethodName([]).should.equal ''
 
     it 'should give back the name of the method for correct input', ->
-        description =
-            testName:
-                testServiceType:
-                    testMethod: {}
-        util.getMethodName(description).should.equal 'testMethod'
+        util.getMethodName('testMethod').should.equal 'GetReportBlock_testMethod'
 
 describe 'transformWebIToObjectArray', ->
     it 'should return empty array for malformed input', ->
@@ -60,4 +56,12 @@ describe 'transformQAWSToObjectArray', ->
             name: 'fieldName'
         ]
         util.transformQAWSToObjectArray(fields, data).should.deep.equal [{fieldName: 'dataValue'}]
+
+describe 'methodToTable', ->
+    it 'should detect tables', ->
+        util.methodToTable('GetReportBlock_virtdb-webi-test2').should.equal 'virtdb-webi-test2'
+        util.methodToTable('GetReportBlock_bobj-access-demo').should.equal 'bobj-access-demo'
+
+    it 'should return null for non-tables', ->
+        should.not.exist util.methodToTable('Drill_bobj-access-demo')
 

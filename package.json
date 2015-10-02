@@ -1,6 +1,6 @@
 {
   "name": "bobj-access",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "description": "Module for retrieving tables from published Business Objects reports",
   "main": "lib/index.js",
   "scripts": {

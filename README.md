@@ -16,44 +16,49 @@ var sap = require('bobj-access');
 var wsdlUrl = '<path to the business objects published web service wsdl>'
 var credentials = { username: 'sapuser', password: 'sappassword' };
 
-sap.getTables(wsdlUrl, credentials, function(err, tables) {
-  if (!err) {
-    console.log("Got definition of tables: ", tables);
-  }
-});
-
-sap.getTableData(wsdlUrl, credentials, function(err, rows) {
-  if (!err) {
-    for (var i = 0; i < rows.length; i++) {
-      console.log("Row in data: ", rows[i]);
+sap.getTableList(wsdl, function(err, tables) {
+    for (var i = 0; i < tables.length; i++) {
+        var tableName = tables[i];
+        sap.getFields(wsdl, credentials, tableName, function(err, fields) {
+            console.log(err);
+            console.log(fields);
+            sap.getTableData(wsdl, credentials, tableName, function(err, data) {
+                console.log(err);
+                console.log(data);
+            });
+        });
     }
-  }
 });
 ```
 
 # Methods
 
-## getTables(wsdl, credentials, callback)
+## getTableList(wsdl, callback)
+  * ```wsdl```: the URL of the Business Objects WSDL of a published web service
+  * ```callback(err, tables)```
+    * ```err```: null if everything was ok
+    * ```tables```: An array of the tables in the provided report
+
+## getFields(wsdl, credentials, tableName, callback)
 
   * ```wsdl```: the URL of the Business Objects WSDL of a published web service
   * ```credentials```: username and password for a user who can access the published service
-  * ```callback(err, tables)```
+  * ```tableName```: the name of the table the fields of which we are selecting
+  * ```callback(err, fields)```
     * ```err```: null if everything was ok
-    * ```tables```: A list of items in the following format. 
+    * ```fields```: An array of fields in the following format
 
       ``` javacript
       { 
-        Name: 'tablename', 
-        Fields: [ {
-          name: 'fieldName', 
-          type: 'STRING'
-        } ] 
+        name: 'fieldName', 
+        type: 'STRING'
       }
       ```
       
-## getTableData(wsdl, credentials, callback)
+## getTableData(wsdl, credentials, tableName, callback)
   * ```wsdl```: the URL of the Business Objects WSDL of a published web service
   * ```credentials```: username and password for a user who can access the published service
+  * ```tableName```: the name of the table the data of which we are selecting
   * ```callback(err, rows)```
     * ```err```: null if everything was ok
     * ```rows```: A list objects with the following format

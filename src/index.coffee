@@ -7,7 +7,7 @@ callSoapMethod = (client, methodName, credentials, options, callback) ->
     options.password = credentials.password
     client[methodName] [options], callback
 
-extractFieldsFromWSDL = (client, credentials, callback) ->
+extractFieldsFromWSDL = (client, credentials, tableName, callback) ->
     fields = []
     if util.getServiceType(client.wsdl) is util.QAWS
         for field, typeDesc of client.wsdl.definitions.descriptions.types.Row
@@ -15,7 +15,7 @@ extractFieldsFromWSDL = (client, credentials, callback) ->
                 fields.push {name: field, type: util.getType(typeDesc)}
         callback null, fields
     else
-        callSoapMethod client, util.getMethodName(client.describe()), credentials, {startRow: 1, endRow: 1}, (err, results) ->
+        callSoapMethod client, util.getMethodName(tableName), credentials, {startRow: 1, endRow: 1}, (err, results) ->
             if not results?.headers?.row?
                 errorMessage = "Could not get records from soap."
                 if results?.message?
@@ -27,6 +27,17 @@ extractFieldsFromWSDL = (client, credentials, callback) ->
                         fields.push {name: cell.$value, type: util.getType(cell.attributes['xsi:type'])}
             callback err, fields
 
+getTableList = (wsdlUrl, callback) ->
+    soap.createClient wsdlUrl, (err, client) ->
+        tables = []
+        for reportName, reports of client.describe()
+            for serviceType, method of reports
+                for methodName of method
+                    tableName = util.methodToTable methodName
+                    if tableName?
+                        tables.push tableName
+        callback err, tables
+
 getTableName = (wsdlUrl, callback) ->
     soap.createClient wsdlUrl, (err, client) ->
         for tableName, tables of client.describe()
@@ -34,34 +45,22 @@ getTableName = (wsdlUrl, callback) ->
             return
         callback new Error("Could not find table name in wsdl"), null
 
-getFields = (wsdlUrl, credentials, callback) ->
+getFields = (wsdlUrl, credentials, tableName, callback) ->
     if not wsdlUrl?
         callback new Error("Invalid config. No WSDL set.")
         return
     soap.createClient wsdlUrl, (err, client) ->
         unless err?
-            extractFieldsFromWSDL client, credentials, callback
+            extractFieldsFromWSDL client, credentials, tableName, callback
         else
             callback err, null
 
-getTables = (wsdl, credentials, callback) ->
-    getTableName wsdl, (err, tableName) ->
-        unless err?
-            getFields wsdl, credentials, (err, fields) ->
-                tables = [
-                    Name: tableName
-                    Fields: fields
-                ]
-                callback err, tables
-        else
-            callback err, null
-
-getTableData = (wsdlUrl, credentials, callback) ->
-    getFields wsdlUrl, credentials, (err, fields) ->
+getTableData = (wsdlUrl, credentials, tableName, callback) ->
+    getFields wsdlUrl, credentials, tableName, (err, fields) ->
         unless err?
             soap.createClient wsdlUrl, (err, client) ->
                 unless err?
-                    callSoapMethod client, util.getMethodName(client.describe()), credentials, {}, (err, results) ->
+                    callSoapMethod client, util.getMethodName(tableName), credentials, {}, (err, results) ->
                         unless err?
                             data = results.table.row
                             if util.getServiceType(client.wsdl) is util.QAWS
@@ -75,5 +74,6 @@ getTableData = (wsdlUrl, credentials, callback) ->
             callback err, null
 
 module.exports =
-    getTables: getTables
+    getTableList: getTableList
+    getFields: getFields
     getTableData: getTableData
