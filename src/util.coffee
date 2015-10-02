@@ -1,3 +1,5 @@
+PATTERN = 'GetReportBlock_'
+
 Util =
     QAWS: "QAWS"
     WEBI: "WEBI"
@@ -8,18 +10,22 @@ Util =
             when 's:string', 'xsd:string' then 'STRING'
             else 'STRING'
 
+    methodToTable: (methodName) ->
+        index = methodName.indexOf PATTERN
+        if index is 0
+            return methodName.substring PATTERN.length, methodName.length
+        return null
+
     getServiceType: (wsdl) ->
         if wsdl?.definitions?.descriptions?.types?.Row?
             Util.QAWS
         else
             Util.WEBI
 
-    getMethodName: (description) ->
-        for tableName, tables of description
-            for serviceType, method of tables
-                for methodName of method
-                    return methodName
-        return ''
+    getMethodName: (tableName) ->
+        if not tableName? or typeof(tableName) isnt 'string'
+            return ''
+        return PATTERN + tableName
 
     transformWebIToObjectArray: (fields, data) ->
         ret = []
