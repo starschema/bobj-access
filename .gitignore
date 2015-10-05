@@ -4,6 +4,7 @@ lib/
 # Editor files
 *.swp
 tags
+.idea
 
 # Dependencies
 node_modules/
