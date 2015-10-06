@@ -29,21 +29,27 @@ extractFieldsFromWSDL = (client, credentials, tableName, callback) ->
 
 getTableList = (wsdlUrl, callback) ->
     soap.createClient wsdlUrl, (err, client) ->
-        tables = []
-        for reportName, reports of client.describe()
-            for serviceType, method of reports
-                for methodName of method
-                    tableName = util.methodToTable methodName
-                    if tableName?
-                        tables.push tableName
-        callback err, tables
+        unless err?
+            tables = []
+            for reportName, reports of client.describe()
+                for serviceType, method of reports
+                    for methodName of method
+                        tableName = util.methodToTable methodName
+                        if tableName?
+                            tables.push tableName
+            callback err, tables
+        else
+            callback err, null
 
 getTableName = (wsdlUrl, callback) ->
     soap.createClient wsdlUrl, (err, client) ->
-        for tableName, tables of client.describe()
-            callback err, tableName
-            return
-        callback new Error("Could not find table name in wsdl"), null
+        unless err?
+            for tableName, tables of client.describe()
+                callback err, tableName
+                return
+            callback new Error("Could not find table name in wsdl"), null
+        else
+            callback err, null
 
 getFields = (wsdlUrl, credentials, tableName, callback) ->
     if not wsdlUrl?
