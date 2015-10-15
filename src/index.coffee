@@ -20,11 +20,13 @@ extractFieldsFromWSDL = (client, credentials, tableName, callback) ->
                 errorMessage = "Could not get records from soap."
                 if results?.message?
                     errorMessage += results.message
-                err = new Error(errorMessage)
+                err = new Error errorMessage
             unless err?
                 for row in results.headers.row
                     for cell in row.cell
-                        fields.push {name: cell.$value, type: util.getType(cell.attributes['xsi:type'])}
+                        index = row.cell.indexOf cell
+                        data = results.table.row[0].cell[index]
+                        fields.push {name: cell.$value, type: util.getType(data.attributes['xsi:type'])}
             callback err, fields
 
 getTableList = (wsdlUrl, callback) ->
