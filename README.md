@@ -55,10 +55,11 @@ sap.getTableList(wsdl, function(err, tables) {
       }
       ```
       
-## getTableData(wsdl, credentials, tableName, callback)
+## getTableData(wsdl, credentials, tableName, options, callback)
   * ```wsdl```: the URL of the Business Objects WSDL of a published web service
   * ```credentials```: username and password for a user who can access the published service
   * ```tableName```: the name of the table the data of which we are selecting
+  * ```options```: currently only the Limit can be set here but later the filters will be appliable as well
   * ```callback(err, rows)```
     * ```err```: null if everything was ok
     * ```rows```: A list objects with the following format

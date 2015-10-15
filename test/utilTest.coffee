@@ -26,6 +26,8 @@ describe 'getMethodName', ->
 
     it 'should give back the name of the method for correct input', ->
         util.getMethodName('testMethod').should.equal 'GetReportBlock_testMethod'
+        client = { wsdl: { definitions: { descriptions: { types: Row: {}}}}}
+        util.getMethodName('testMethod', client).should.equal 'testMethod'
 
 describe 'transformWebIToObjectArray', ->
     it 'should return empty array for malformed input', ->
@@ -61,6 +63,7 @@ describe 'methodToTable', ->
     it 'should detect tables', ->
         util.methodToTable('GetReportBlock_virtdb-webi-test2').should.equal 'virtdb-webi-test2'
         util.methodToTable('GetReportBlock_bobj-access-demo').should.equal 'bobj-access-demo'
+        util.methodToTable('runQueryAsAService').should.equal 'runQueryAsAService'
 
     it 'should return null for non-tables', ->
         should.not.exist util.methodToTable('Drill_bobj-access-demo')

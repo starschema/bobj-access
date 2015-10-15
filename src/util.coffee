@@ -1,4 +1,5 @@
 PATTERN = 'GetReportBlock_'
+ANTI_PATTERN = 'Drill_'
 
 Util =
     QAWS: "QAWS"
@@ -11,10 +12,12 @@ Util =
             else 'STRING'
 
     methodToTable: (methodName) ->
-        index = methodName.indexOf PATTERN
-        if index is 0
+        if (methodName.indexOf PATTERN) is 0
             return methodName.substring PATTERN.length, methodName.length
-        return null
+        else if (methodName.indexOf ANTI_PATTERN) is 0
+            return null
+        else
+            return methodName
 
     getServiceType: (wsdl) ->
         if wsdl?.definitions?.descriptions?.types?.Row?
@@ -22,7 +25,10 @@ Util =
         else
             Util.WEBI
 
-    getMethodName: (tableName) ->
+    getMethodName: (tableName, client) ->
+        if client?
+            if Util.getServiceType(client.wsdl) is Util.QAWS
+                return tableName
         if not tableName? or typeof(tableName) isnt 'string'
             return ''
         return PATTERN + tableName

@@ -61,12 +61,16 @@ getFields = (wsdlUrl, credentials, tableName, callback) ->
         else
             callback err, null
 
-getTableData = (wsdlUrl, credentials, tableName, callback) ->
+getTableData = (wsdlUrl, credentials, tableName, options, callback) ->
     getFields wsdlUrl, credentials, tableName, (err, fields) ->
         unless err?
             soap.createClient wsdlUrl, (err, client) ->
                 unless err?
-                    callSoapMethod client, util.getMethodName(tableName), credentials, {}, (err, results) ->
+                    soapOptions = {}
+                    if options?.Limit? > 0
+                        soapOptions.startRow = 1
+                        soapOptions.endRow = options.Limit
+                    callSoapMethod client, util.getMethodName(tableName, client), credentials, soapOptions, (err, results) ->
                         unless err?
                             data = results.table.row
                             if util.getServiceType(client.wsdl) is util.QAWS
