@@ -1,0 +1,26 @@
+language: javascript
+sudo: required
+services:
+  - docker
+
+env:
+  global:
+    - secure: "DwaGHSzXBaLBIUx9TE0cQEE6m/tayx3eVj57/wYkkQi61+NEn0YlZe/w4st/4v6UAeerU4ezs0WnJ8CR+tiDpQTg2frN0jwAcoDdI8+s1fj3ScfWPaflTZJaIUyexFAv+ZUJw60dk0QvptbN87Cl8pLgBWuplVEy6RNKgGfBlWDMV+t6EfnZGbjaeCLVHnSB0/BT5rx5+23BdeIUqarUWJBh+zxHO3sXkxPC3WiAYN4Te2l/OiU252xjOGIfL0nMSKHnRcZ7wCsiOEH3+87X2BctA/p6xC/pmhRYkAzbT27s+6EYd2bzKVfPwiykqT/vYzWWq6xTz/cnO9BT0qAyzsds6Ny/OnOpr3SURSlyYxuz8fDXn5zCaXRj8ClvX8dKyTTzT80ViR7El5mGEqgnUnF1fQZoxMgIbRnGRvhaysGxVt2uP8qnG+Tcbu5UYGq7/HSvBy33UV49M+17IUig/ghgYi4kiLdZU+UDGh1XaD3MGFOHtJtiPNBs+uBA1EuSHKr5C6h5zo42G3r6BZa0yKBeJPIoxPV5aTI2Dv8w4D+BMygRPwoAQaUlDVMW6UW9bIAJmHb+yRmsWaPAFvHfIeZbsKBkhr5xk4Ai7RwYi4DvxqmYSnYO+n+cDOo0vbk4EexSpSco/EGBItPf5dK6N10XKvipA+BcM56KdO4s/xs="
+    - secure: "SHW+EvN6tpGe3hMFvHyy9eD4/+Pa68zwMwYqNgv8Llo4diI47TXQ2jZU4el9SeopFYYJQAp2MG7gaeSDGmWSv19fB49Gadlmw4U6G6W4GdAp0MmBgLSQSQjwT5DufSNi9uLmoIDMGAXQOXOob/SnPAW1p+MUS6t0ccO6qAUBHgqgVz0IEK9BCZLAKwJeaxy9+MCntiAkC+wmqDQnLRLWsDxQnk9Y5W/+1qmC9j681f+pG051Jq4WTn5+nwfzL5MM35SmAnT0CEix2XB8utv8QOsPSUsusqzXeT1oMM7MkNlI0f7De8/nz10FiKVUZLn0ajT47o49HLW7KZdoyjagsh614mwmJ+vpLxVpvqXoxIwrE1K3OsHs7zPsu1764E/4PdWFrDt1V88/8zVzarxGkjkMxeSIrST8n2zRPcCBRD2a32I5HHBf4mlmd9iDS6hLMY4emJ6hmKmiWSPoYvU/B3hYCv28FTMqNH5iJM7iW2D+cKHN8/jEJ4vu44vAJ17IMs+20ctT3btcjGpWUpVOsz2iJYg2ZLpWNAUXF4KkQqsD1sNKrmD86leL5QZ7vu6I0FMAZ2w8SxQ9cNHmgw5GpLQ6j6MqsmzEm8FOkAuz/azpcZmVSpyrOijXith0xwM+rLLPL/Jt/ZLzYbkk5GmhaizNUPkDAOXZcH45xqIZ+Cg="
+    - GITHUB_EMAIL=jenkins@starschema.net
+    - GITHUB_USER=jenkins-starschema
+    - PACKAGE=bobj-access
+
+install:
+    - docker build -t virtdb/builder .
+
+script:
+    - docker run --rm=true -e "PACKAGE=$PACKAGE" -e "NPM_TOKEN=$NPM_TOKEN" -e "GITHUB_EMAIL=$GITHUB_EMAIL" -e "GITHUB_USER=$GITHUB_USER" -e "GITHUB_TOKEN=$GITHUB_TOKEN" -t virtdb/builder ./build.sh
+    - docker run --rm=true -e "PACKAGE=$PACKAGE" -e "NPM_TOKEN=$NPM_TOKEN" -e "GITHUB_EMAIL=$GITHUB_EMAIL" -e "GITHUB_USER=$GITHUB_USER" -e "GITHUB_TOKEN=$GITHUB_TOKEN" -t virtdb/builder ./deploy.sh
+
+notifications:
+  slack:
+    secure: AenWHk9OSHr7Z+blM0Mlex6Vu6cqPB/DHuP6W/pFaSNLSmPuLLsau/mJyMUcekt7haD8bmJS83rpGcUIWBsCtunMtl6UM/748ErhrottKrOsDAi/x/9vfg+A/cJL36dt3eS9gZwaFIz4Inw6KyGCY2zoTNuMkTa8a2as4g5oOBc=
+  on_success: change
+  on_failure: always
+  on_start: never
