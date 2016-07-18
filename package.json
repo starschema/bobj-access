@@ -36,6 +36,7 @@
     "pre-commit": "^1.1.1"
   },
   "dependencies": {
+    "sax": "^1.2.1",
     "soap": "^0.9.4"
   }
 }

@@ -1,5 +1,6 @@
 soap =  require 'soap'
 util = require './util'
+parseWebiTableXml = require './table_sax_parser'
 
 callSoapMethod = (client, methodName, credentials, options, callback) ->
     options ?= {}
@@ -71,18 +72,19 @@ getTableData = (wsdlUrl, credentials, tableName, options, callback) ->
                     if options?.Limit? > 0
                         soapOptions.startRow = 1
                         soapOptions.endRow = options.Limit
-                    callSoapMethod client, util.getMethodName(tableName, client), credentials, soapOptions, (err, results) ->
+                    callSoapMethod client, util.getMethodName(tableName, client), credentials, soapOptions, (err, results, raw) ->
                         unless err?
                             data = results.table.row
                             if util.getServiceType(client.wsdl) is util.QAWS
                                 data = util.transformQAWSToObjectArray fields, data
                             else
-                                data = util.transformWebIToObjectArray fields, data
+                                data = parseWebiTableXml(raw)
                         callback err, data
                 else
                     callback err, null
         else
             callback err, null
+
 
 module.exports =
     getTableList: getTableList
