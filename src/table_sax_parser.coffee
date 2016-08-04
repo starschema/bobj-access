@@ -13,6 +13,7 @@ generateResultParser = (data)->
   isInCell = true
   rows = []
   currentRow = []
+  columnTypes = []
 
   isInHeader = false
   headerFields = []
@@ -27,10 +28,15 @@ generateResultParser = (data)->
     switch node.name
       when 'table' then isInTable = true
       when 'headers' then isInHeader = true
-      when 'row' then currentRow = []
+      when 'row'
+        currentRow = []
+        columnTypes = []
 
       when 'cell'
         break unless isInTable
+
+        # Add the type to the list of types
+        columnTypes.push(node.attributes['xsi:type'])
 
         # handle nils here (not in ontext())
         # TODO: what if xsi refers to a different namespace?
@@ -63,8 +69,9 @@ generateResultParser = (data)->
       o[fieldName] = row[fieldIdx]
     o
 
+  # Collect the field types
+  typesOut = ({name: fieldName, type: columnTypes[fieldIdx] } for fieldName, fieldIdx in headerFields)
 
-
-  output
+  return { data: output, fields: typesOut }
 
 module.exports = generateResultParser

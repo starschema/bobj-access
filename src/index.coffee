@@ -16,17 +16,15 @@ extractFieldsFromWSDL = (client, credentials, tableName, callback) ->
                 fields.push {name: field, type: util.getType(typeDesc)}
         callback null, fields
     else
-        callSoapMethod client, util.getMethodName(tableName), credentials, {startRow: 1, endRow: 1}, (err, results) ->
+        callSoapMethod client, util.getMethodName(tableName), credentials, {startRow: 1, endRow: 1}, (err, results, raw) ->
             if not results?.headers?.row?
                 errorMessage = "Could not get records from soap."
                 if results?.message?
                     errorMessage += results.message
                 err = new Error errorMessage
             unless err?
-                for row in results.headers.row
-                    for index, cell of row.cell
-                        data = results.table.row[0].cell[index]
-                        fields.push {name: cell.$value, type: util.getType(data.attributes['xsi:type'])}
+                # Use our own parser to parse the first row
+                fields = parseWebiTableXml(raw).fields.map( (e)-> { name: e.name, type: util.getType(e.type) } )
             callback err, fields
 
 getTableList = (wsdlUrl, callback) ->
@@ -78,7 +76,7 @@ getTableData = (wsdlUrl, credentials, tableName, options, callback) ->
                             if util.getServiceType(client.wsdl) is util.QAWS
                                 data = util.transformQAWSToObjectArray fields, data
                             else
-                                data = parseWebiTableXml(raw)
+                                data = parseWebiTableXml(raw).data
                         callback err, data
                 else
                     callback err, null
