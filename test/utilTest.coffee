@@ -7,6 +7,7 @@ describe 'getType', ->
     it 'should standardize different BO types', ->
         util.getType('s:double').should.equal util.getType('xsd:double')
         util.getType('s:string').should.equal util.getType('xsd:string')
+		util.getType('s:dateTime').should.equal util.getType('xsd:dateTime')
 
 describe 'getServiceType', ->
     it 'should give back either QAWS or WEBI', ->

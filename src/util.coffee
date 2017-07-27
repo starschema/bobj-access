@@ -9,6 +9,7 @@ Util =
         switch typeDesc
             when 's:double', 'xsd:double' then 'DOUBLE'
             when 's:string', 'xsd:string' then 'STRING'
+            when 's:dateTime', 'xsd:dateTime' then 'DATETIME'
             else 'STRING'
 
     methodToTable: (methodName) ->
