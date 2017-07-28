@@ -2,11 +2,15 @@ soap =  require 'soap'
 util = require './util'
 parseWebiTableXml = require './table_sax_parser'
 
-callSoapMethod = (client, methodName, credentials, options, callback) ->
+callSoapMethod = (client, methodName, credentials, options, callback, method) ->
     options ?= {}
     options.login = credentials.username
     options.password = credentials.password
-    client[methodName] [options], callback
+    options.resetState = "True"
+    if client[methodName]
+        client[methodName] [options], method
+    else
+        callback new Error "Method #{methodName} is not available anymore! (Probably got removed.) ", []
 
 extractFieldsFromWSDL = (client, credentials, tableName, callback) ->
     fields = []
@@ -16,7 +20,7 @@ extractFieldsFromWSDL = (client, credentials, tableName, callback) ->
                 fields.push {name: field, type: util.getType(typeDesc)}
         callback null, fields
     else
-        callSoapMethod client, util.getMethodName(tableName), credentials, {startRow: 1, endRow: 1}, (err, results, raw) ->
+        callSoapMethod client, util.getMethodName(tableName), credentials, {startRow: 1, endRow: 1}, callback, (err, results, raw) ->
             if not results?.headers?.row?
                 errorMessage = "Could not get records from soap."
                 if results?.message?
@@ -28,7 +32,7 @@ extractFieldsFromWSDL = (client, credentials, tableName, callback) ->
             callback err, fields
 
 getTableList = (wsdlUrl, callback) ->
-    soap.createClient wsdlUrl, (err, client) ->
+    soap.createClient wsdlUrl, { disableCache: true }, (err, client) ->
         unless err?
             tables = []
             for reportName, reports of client.describe()
@@ -42,7 +46,7 @@ getTableList = (wsdlUrl, callback) ->
             callback err, null
 
 getTableName = (wsdlUrl, callback) ->
-    soap.createClient wsdlUrl, (err, client) ->
+    soap.createClient wsdlUrl, { disableCache: true }, (err, client) ->
         unless err?
             for tableName, tables of client.describe()
                 callback err, tableName
@@ -55,7 +59,7 @@ getFields = (wsdlUrl, credentials, tableName, callback) ->
     if not wsdlUrl?
         callback new Error("Invalid config. No WSDL set.")
         return
-    soap.createClient wsdlUrl, (err, client) ->
+    soap.createClient wsdlUrl, { disableCache: true }, (err, client) ->
         unless err?
             extractFieldsFromWSDL client, credentials, tableName, callback
         else
@@ -64,13 +68,13 @@ getFields = (wsdlUrl, credentials, tableName, callback) ->
 getTableData = (wsdlUrl, credentials, tableName, options, callback) ->
     getFields wsdlUrl, credentials, tableName, (err, fields) ->
         unless err?
-            soap.createClient wsdlUrl, (err, client) ->
+            soap.createClient wsdlUrl, { disableCache: true }, (err, client) ->
                 unless err?
                     soapOptions = {}
                     if options?.Limit? > 0
                         soapOptions.startRow = 1
                         soapOptions.endRow = options.Limit
-                    callSoapMethod client, util.getMethodName(tableName, client), credentials, soapOptions, (err, results, raw) ->
+                    callSoapMethod client, util.getMethodName(tableName, client), credentials, soapOptions, callback, (err, results, raw) ->
                         unless err?
                             data = results.table.row
                             if util.getServiceType(client.wsdl) is util.QAWS
