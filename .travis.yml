@@ -1,7 +1,7 @@
-language: javascript
+language: node_js
+node_js:
+  - "6"
 sudo: required
-services:
-- docker
 env:
   global:
   - secure: DwaGHSzXBaLBIUx9TE0cQEE6m/tayx3eVj57/wYkkQi61+NEn0YlZe/w4st/4v6UAeerU4ezs0WnJ8CR+tiDpQTg2frN0jwAcoDdI8+s1fj3ScfWPaflTZJaIUyexFAv+ZUJw60dk0QvptbN87Cl8pLgBWuplVEy6RNKgGfBlWDMV+t6EfnZGbjaeCLVHnSB0/BT5rx5+23BdeIUqarUWJBh+zxHO3sXkxPC3WiAYN4Te2l/OiU252xjOGIfL0nMSKHnRcZ7wCsiOEH3+87X2BctA/p6xC/pmhRYkAzbT27s+6EYd2bzKVfPwiykqT/vYzWWq6xTz/cnO9BT0qAyzsds6Ny/OnOpr3SURSlyYxuz8fDXn5zCaXRj8ClvX8dKyTTzT80ViR7El5mGEqgnUnF1fQZoxMgIbRnGRvhaysGxVt2uP8qnG+Tcbu5UYGq7/HSvBy33UV49M+17IUig/ghgYi4kiLdZU+UDGh1XaD3MGFOHtJtiPNBs+uBA1EuSHKr5C6h5zo42G3r6BZa0yKBeJPIoxPV5aTI2Dv8w4D+BMygRPwoAQaUlDVMW6UW9bIAJmHb+yRmsWaPAFvHfIeZbsKBkhr5xk4Ai7RwYi4DvxqmYSnYO+n+cDOo0vbk4EexSpSco/EGBItPf5dK6N10XKvipA+BcM56KdO4s/xs=
@@ -12,19 +12,17 @@ env:
   - OWNER=starschema
   - BUILD_DIR=/home/virtdb-demo/repo
   - BUILD_SCRIPTS_DIR=/home/virtdb-demo/scripts
+before_install:
+  - npm install
 install:
-- docker build -t virtdb/builder .
+  - npm install gulp
 script:
-- docker run --rm=true -e "BUILD_DIR=$BUILD_DIR" -e "PACKAGE=$PACKAGE" -e "OWNER=$OWNER"
-  -e "NPM_TOKEN=$NPM_TOKEN" -e "GITHUB_EMAIL=$GITHUB_EMAIL" -e "GITHUB_USER=$GITHUB_USER"
-  -e "GITHUB_TOKEN=$GITHUB_TOKEN" -t virtdb/builder $BUILD_SCRIPTS_DIR/build.sh
-- if [ "X$TRAVIS_PULL_REQUEST" == "Xfalse" ]; then docker run --rm=true -e "BUILD_DIR=$BUILD_DIR"
-  -e "PACKAGE=$PACKAGE" -e "OWNER=$OWNER" -e "NPM_TOKEN=$NPM_TOKEN" -e "GITHUB_EMAIL=$GITHUB_EMAIL"
-  -e "GITHUB_USER=$GITHUB_USER" -e "GITHUB_TOKEN=$GITHUB_TOKEN" -t virtdb/builder
-  $BUILD_SCRIPTS_DIR/release-to-npm.sh; fi
-notifications:
-  slack:
-    secure: QI2ZpjYh822mj2QB69RiaEePG+JfLSC4wYJuMr2MkfMZRD6Gqga/CGVDP4SbY36LX42vn7XoOyM1mkXPcSBcVQh0T9RK/ygqjfctEx2/mMaDweQJQ8xQ+mkZ/hoFiwQoaIevC0QIEn8RTBJOwc7d80EeKmMZHsGwhOW/pGLbEcHyIIhKWsVt6F/ksQE1PsRyVRUob7dmEQfZ/Fv/O7yIy+/DTmjFhPJQouoKp0ul3wzSTkp49zS8drIjTznS2X1bnVN5/R5RWaqhp1n7MnIVW+Ffi1WPRJCqQJHNRsvca7hx8JJ5P+mOSFIliXXzPvMl99/YOP8W0tdZZcHpL0kB7SRi5yEI87Hwpfsz59tO4MFS7Uc7XL+6zdU5romrfmaTEz8qaV+IF6bOJ3okxopcuCyInUaSXVZJNa9C/KNh0pdIHD1a8ImBpNwx5G42PM+6NC9lhiqU15vONv01sNABFFfS4LV1pubfsMFO0c08sy/Xg8/p/Okw9YfL8YnOj4JLqAubB8qhSb4yrlU9F9G67KhX/Kh/uy54Bd4gcAnpPAIKO1Lfqpk46VG0RqW+cEwur9E3p95YKzOUd6SuDcieFInS7VzzyOu59DoXOKpXuClRhlsErqtDclPMeAtVFyF2bAeJDkIOMaNA0WeFtI8MYBiQXyhqraGhCyH1MjwUKEE=
-  on_success: change
-  on_failure: always
-  on_start: never
+  - gulp build
+deploy:
+  provider: npm
+  email: jenkins@starschema.net
+  api_key:
+    secure: mfhMQ0MKU1TQncMrT5WQQDq5uOcbGhOf+Y/MlPHhan/L1pgfZq1ZLMnnnCH1ZVueGQX0/Ey9ANOXkv3cZb5oIFjtDFtUZ40T/ulAil5jtwsZsR4hXLqXiICHDAXA3O1cnYjdg+5p73H0DvJXJsRu3Ev1Or/ApmrKR+rfgXqwU5w0yC3AXxmsmr3OXHHdMK1P7wvKkbFpuftf6M/Xiu8MHwdGTk0s03G0Jtag67pJnCn29PyRGhRDSfSyv84MIBT+XIlAJZeOp7/f7B9nlcm/TyO0YPM38MMm5KcMCwqin8cga534S9zkaW6e9LpNwyx/cavyKH9VqTIwiqD9Hpc/CL4AyxDAdpX3Gx9wTfJlEWOJk1ESo4FqkPEXGGKsKG/YmhTq7uu4yKl/ROVDyJo1pXGbKPr/x5JcuwrhkqWNA9QOfCZaH0EqrKP/ZWfTnRDKekLCAtkyQsNMbt8U0duZZpgKOCoiSCdoW+f3ibKYKwWNoFco9SzqpVh0LKE/bqqVg+rrO7hXlw2a/rZEy3v4h6Re9zT0JPxycf++fow8bQ3cxi00wM/ztxYImMcvM4twhn6d6jWNdo1sbAVr252kEYSbc3yfZx9Lq3sGXfCe0PAromiV1f5MWS0rH/d2ckv+TaxrlewB3gRGr6yWT2OBZctQHmcdPD7Qn2IboNa1SOY=
+  on:
+    tags: true
+    repo: starschema/bobj-access
