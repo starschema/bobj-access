@@ -18,11 +18,15 @@ generateResultParser = (data)->
   isInHeader = false
   headerFields = []
 
+  isSelfClosingTag = false
+
   parser.onerror = (e)-> console.error "ERROR:", e
 
   parser.ontext = (t)->
     headerFields.push(t) if isInHeader
-    currentRow.push(t) if isInCell
+    if isInCell
+      currentRow.push(t)
+      isSelfClosingTag = false
 
   parser.onopentag = (node)->
     switch node.name
@@ -38,12 +42,8 @@ generateResultParser = (data)->
         # Add the type to the list of types
         columnTypes.push(node.attributes['xsi:type'])
 
-        # handle nils here (not in ontext())
-        # TODO: what if xsi refers to a different namespace?
-        if node.attributes['xsi:nil']
-          currentRow.push(null)
-        else
-          isInCell = true
+        isSelfClosingTag = true
+        isInCell = true
 
 
   parser.onclosetag = (name)->
@@ -56,6 +56,7 @@ generateResultParser = (data)->
         currentRow = []
 
       when 'cell'
+        currentRow.push(null) if isSelfClosingTag
         # exit from the cell state
         isInCell = false
 

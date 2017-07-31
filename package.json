@@ -1,6 +1,6 @@
 {
   "name": "bobj-access",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Module for retrieving tables from published Business Objects reports",
   "main": "lib/index.js",
   "scripts": {
@@ -40,6 +40,6 @@
   },
   "dependencies": {
     "sax": "^1.2.1",
-    "soap": "^0.9.4"
+    "soap": "^0.19.2"
   }
 }
