@@ -6,7 +6,7 @@ callSoapMethod = (client, methodName, credentials, options, callback, method) ->
     options ?= {}
     options.login = credentials.username
     options.password = credentials.password
-    options.resetState = "True"
+    options.getFromLatestDocumentInstance = "True"
     if client[methodName]
         client[methodName] [options], method
     else
